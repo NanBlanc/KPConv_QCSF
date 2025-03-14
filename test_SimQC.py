@@ -64,10 +64,10 @@ if __name__ == '__main__':
     output_path=ost.createDirIncremental(output_path+"/inference")
     
     #INTENSTITY MAX VALUE AND DATA
-    # data_path="/home/reza/PHD/Data/SimQC/test"
-    # intensity_max=1025
-    data_path="/home/reza/PHD/Data/ALSlike_full_seq/test"
-    intensity_max=125
+    data_path="/home/reza/PHD/Data/SimQC/test"
+    intensity_max=1025
+    # data_path="/home/reza/PHD/Data/ALSlike_full_seq/test"
+    # intensity_max=125
   
 
     ############################

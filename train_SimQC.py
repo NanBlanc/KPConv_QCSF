@@ -130,7 +130,6 @@ class SimQCConfig(Config):
 
     # Choice of input features
     first_features_dim = 128
-    in_features_dim = 2
 
     # Can the network learn modulations
     modulated = False
@@ -171,16 +170,27 @@ class SimQCConfig(Config):
     # Number of epoch between each checkpoint
     checkpoint_gap = 10    
     
+    #Process setup
+    input_threads=0
+    
+    #Experiment setup
+    checkpoint=None # if strat from previous checkpoint give path ortherwise None
     saving = True
     saving_path = ost.createDirIncremental("/home/reza/PHD/Sum24/SimQC/KPConv/logs/run")
     project_name= "KPConv-QCSF"
-    run_name="train_e10_int_tr"
+    run_name="train_e10_noint_notr"
     
-    checkpoint=None
+    use_transform=True
+    use_intensity=True
     
+    if use_intensity :
+        in_features_dim = 2
+    else :
+        in_features_dim = 1
+    
+
     class_w=[0.01,0.45,0.45,0.09]
-    
-    input_threads=0
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #
@@ -192,7 +202,7 @@ if __name__ == '__main__':
     ############################
     # Initialize the environment
     ############################
-
+    
     # Set which gpu is going to be used
     GPU_ID = '0'
 
@@ -201,6 +211,10 @@ if __name__ == '__main__':
 
     # Initialize configuration class
     config = SimQCConfig()
+
+    # init expermient WandB registering
+    # run = wandb.init(project=config.project_name, dir=config.saving_path, name=config.run_name)
+
     
     ##############
     # Prepare Data
@@ -246,7 +260,6 @@ if __name__ == '__main__':
     trainer = ModelTrainer(net, config, chkp_path=config.checkpoint)
     print('Done in {:.2f}s\n'.format(time.time() - t1))
     
-    run = wandb.init(project=config.project_name, dir=config.saving_path, name=config.run_name)
     
     print('\nStart training')
     print('**************')

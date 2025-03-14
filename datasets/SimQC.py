@@ -79,9 +79,18 @@ class SimQCDataset(PointCloudDataset):
             a = ost.pathRelative(file,2)
             a = os.path.join(a.split("/")[0],a.split("/")[1])
             self.sequences += [a]
-
-        self.intensity_max=intensity_max
-        print("Normalization of intensity data at : ", self.intensity_max)
+        
+        if config.use_intensity:
+            print("Run with intensity")
+            self.intensity_max=intensity_max
+            print("\tNormalization of intensity data at : ", self.intensity_max)
+        else:
+            print("Run WITHOUT intensity")
+        
+        if config.use_transform:
+            print("Run with transformations")
+        else:
+            print("Run WITHOUT transformations")
 
         self.sequences = list(set(self.sequences))
 
@@ -245,8 +254,6 @@ class SimQCDataset(PointCloudDataset):
         The main thread gives a list of indices to load a batch. Each worker is going to work in parallel to load a
         different list of indices.
         """
-        # print("BAAAAATCH I", batch_i)
-        batch_iList = []
 
         # Initiate concatanation lists
         p_list = []
@@ -261,7 +268,6 @@ class SimQCDataset(PointCloudDataset):
         val_labels_list = []
         batch_n = 0
         
-        # print("start at ",int(self.batch_limit))
         while True:
 
             with self.worker_lock:
@@ -279,6 +285,10 @@ class SimQCDataset(PointCloudDataset):
             #########################
             # Merge n_frames together
             #########################
+            
+            #init transfo variable
+            scale=1
+            R=0
 
             # Initiate merged points
             merged_points = np.zeros((0, 3), dtype=np.float32)
@@ -309,31 +319,51 @@ class SimQCDataset(PointCloudDataset):
                 x = data["x"]
                 y = data["y"]
                 z = data["z"]
-                i = data["intensity"]
-                
                 points=np.c_[x, y, z]
-                intensity=ost.featureAugmentation(i[:, np.newaxis],0,self.intensity_max)
+                
+                if self.config.use_intensity :
+                    i = data["intensity"]
+                    intensity=i[:, np.newaxis]/self.intensity_max
+
                 try : 
                     sem_labels = data["class"].astype(np.int32)
                 except :
                     sem_labels = np.zeros((data.shape[0],), dtype=np.int32)
             else:
-                data = read_ply(velo_file)
-                x = data["x"]
-                y = data["y"]
-                z = data["z"]
-                i = data["intensity"]
-                c = data["class"]
-                data = np.c_[x, y, z, i, c]
-                
-                data,R,scale=self.qcsfTransform(data)
-                data=ost.featureAugmentation(data,3,self.intensity_max)
-
-                points=data[:,:3]
-                intensity = data[:,3]
-                intensity = intensity[:, np.newaxis]
-                sem_labels = data[:,4]
-                sem_labels = sem_labels.astype(np.int32)
+                if self.config.use_intensity :
+                    data = read_ply(velo_file)
+                    x = data["x"]
+                    y = data["y"]
+                    z = data["z"]
+                    i = data["intensity"]
+                    c = data["class"]
+                    data = np.c_[x, y, z, i, c]
+                    
+                    if self.config.use_transform:
+                        data,R,scale=self.qcsfTransform(data)
+                        data=ost.featureAugmentation(data,3,self.intensity_max)
+                    else :
+                        data[:,3]/=self.intensity_max
+                    
+                    points=data[:,:3]
+                    intensity = data[:,3]
+                    intensity = intensity[:, np.newaxis]
+                    sem_labels = data[:,4]
+                    sem_labels = sem_labels.astype(np.int32)
+                else :
+                    data = read_ply(velo_file)
+                    x = data["x"]
+                    y = data["y"]
+                    z = data["z"]
+                    c = data["class"]
+                    data = np.c_[x, y, z, c]
+                    
+                    if self.config.use_transform:
+                        data,R,scale=self.qcsfTransform(data)
+    
+                    points=data[:,:3]
+                    sem_labels = data[:,3]
+                    sem_labels = sem_labels.astype(np.int32)
             
             
             # In case of validation, keep the original points in memory
@@ -353,12 +383,16 @@ class SimQCDataset(PointCloudDataset):
             rand_order = np.random.permutation(mask_inds)
             points = points[rand_order]
             sem_labels = sem_labels[rand_order]
-            intensity = intensity[rand_order]
+            if self.config.use_intensity :
+                intensity = intensity[rand_order]
                 
             # Increment merge count
             merged_points = np.asarray(points, dtype=np.float32)
             merged_labels = np.hstack((merged_labels, sem_labels))
-            merged_coords = np.hstack((merged_points, intensity))
+            if self.config.use_intensity :
+                merged_coords = np.hstack((merged_points, intensity))
+            else :
+                merged_coords = merged_points.copy()
             
             #########################
             # Merge n_frames together
@@ -387,9 +421,6 @@ class SimQCDataset(PointCloudDataset):
                 proj_inds = search_tree.query(o_pts[reproj_mask, :], return_distance=False)
                 proj_inds = np.squeeze(proj_inds).astype(np.int32)
                 
-                #fake transfo
-                scale=1
-                R=0
             else:
                 proj_inds = np.zeros((0,))
                 reproj_mask = np.zeros((0,))
@@ -437,19 +468,9 @@ class SimQCDataset(PointCloudDataset):
         elif self.config.in_features_dim == 2:
             # Use original height coordinate
             stacked_features = np.hstack((stacked_features, features[:, 3:4]))
-            
-        elif self.config.in_features_dim == 3:
-            # Use height + reflectance
-            stacked_features = np.hstack((stacked_features, features[:, 2:]))
-        elif self.config.in_features_dim == 4:
-            # Use all coordinates
-            stacked_features = np.hstack((stacked_features, features[:3]))
-        elif self.config.in_features_dim == 5:
-            # Use all coordinates + reflectance
-            stacked_features = np.hstack((stacked_features, features))
-        else:
+        else :
             raise ValueError(
-                "Only accepted input dimensions are 1, 4 and 7 (without and with XYZ)"
+                "Only coded input dimensions are 1, and 2, (without and with intensity)"
             )
 
         #######################

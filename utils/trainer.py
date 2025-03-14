@@ -179,7 +179,8 @@ class ModelTrainer:
             # Remove File for kill signal
             if epoch == config.max_epoch - 1 and exists(PID_file):
                 remove(PID_file)
-            # print("eppppp",epoch,self.epoch,config.max_epoch)
+                
+            print("EPOCH TRACKING: e:",epoch,"self.e:" ,self.epoch,"config.emax:",config.max_epoch)
             
             loss_record=[]
             self.step = 0            
