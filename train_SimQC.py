@@ -180,8 +180,8 @@ class SimQCConfig(Config):
     project_name= "KPConv-QCSF"
     run_name="train_e10_noint_notr"
     
-    use_transform=True
-    use_intensity=True
+    use_transform=False
+    use_intensity=False
     
     if use_intensity :
         in_features_dim = 2
@@ -213,7 +213,7 @@ if __name__ == '__main__':
     config = SimQCConfig()
 
     # init expermient WandB registering
-    # run = wandb.init(project=config.project_name, dir=config.saving_path, name=config.run_name)
+    run = wandb.init(project=config.project_name, dir=config.saving_path, name=config.run_name)
 
     
     ##############
