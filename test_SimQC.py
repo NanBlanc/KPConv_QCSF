@@ -57,7 +57,8 @@ from models.architectures import KPCNN, KPFCNN
 
 if __name__ == '__main__':
     #SELECT CHKPT
-    chkp = "/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e10_int_tr/checkpoints/chkp_best_mVal_IoU_epoch_6.tar"
+    # chkp = "/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_int_tr/checkpoints/chkp_best_mVal_IoU_epoch_6.tar"
+    chkp="/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_noint_notr/checkpoints/chkp_best_mVal_IoU_epoch_6.tar"
     
     #SELECT OUTPUT FOLDER
     output_path="/home/reza/PHD/Sum24/SimQC/KPConv/results"

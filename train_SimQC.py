@@ -178,9 +178,9 @@ class SimQCConfig(Config):
     saving = True
     saving_path = ost.createDirIncremental("/home/reza/PHD/Sum24/SimQC/KPConv/logs/run")
     project_name= "KPConv-QCSF"
-    run_name="train_e10_noint_notr"
+    run_name="train_e10_noint_tr"
     
-    use_transform=False
+    use_transform=True
     use_intensity=False
     
     if use_intensity :

@@ -244,6 +244,12 @@ class Config:
 
                 if line_info[2] == 'None':
                     setattr(self, line_info[0], None)
+                
+                elif line_info[2] == 'True':
+                    setattr(self, line_info[0], True)
+                
+                elif line_info[2] == 'False':
+                    setattr(self, line_info[0], False)
 
                 elif line_info[0] == 'lr_decay_epochs':
                     self.lr_decays = {int(b.split(':')[0]): float(b.split(':')[1]) for b in line_info[2:]}
@@ -380,4 +386,12 @@ class Config:
                 text_file.write('epoch_steps = {:d}\n'.format(self.epoch_steps))
             text_file.write('validation_size = {:d}\n'.format(self.validation_size))
             text_file.write('checkpoint_gap = {:d}\n'.format(self.checkpoint_gap))
+            
+            
+            # SimQC parameters
+            text_file.write('# SimQC parameters\n')
+            text_file.write('# *******************\n\n')
+            
+            text_file.write('use_transform = {:d}\n'.format(self.use_transform))
+            text_file.write('use_intensity = {:d}\n'.format(self.use_intensity))
 

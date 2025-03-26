@@ -177,7 +177,7 @@ class ModelTrainer:
         # Start training loop
         for epoch in range(config.max_epoch):
             # Remove File for kill signal
-            if epoch == config.max_epoch and exists(PID_file):
+            if epoch == config.max_epoch -1 and exists(PID_file):
                 remove(PID_file)
             
             loss_record=[]
