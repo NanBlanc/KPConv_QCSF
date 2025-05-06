@@ -392,6 +392,7 @@ class Config:
             text_file.write('# SimQC parameters\n')
             text_file.write('# *******************\n\n')
             
-            text_file.write('use_transform = {:d}\n'.format(self.use_transform))
-            text_file.write('use_intensity = {:d}\n'.format(self.use_intensity))
 
+            text_file.write('use_transform = {}\n'.format("True" if self.use_transform else "False"))
+            text_file.write('use_intensity = {}\n'.format("True" if self.use_intensity else "False"))
+            text_file.write('dataset_usage = {:.6f}\n'.format(self.dataset_usage))

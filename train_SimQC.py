@@ -178,10 +178,12 @@ class SimQCConfig(Config):
     saving = True
     saving_path = ost.createDirIncremental("/home/reza/PHD/Sum24/SimQC/KPConv/logs/run")
     project_name= "KPConv-QCSF"
-    run_name="train_e10_noint_tr"
+    run_name="train_e10_int_tr_d50_test"
+    
+    dataset_usage=0.5 #if not None, use only part of dataset (use the index_selection file to remove set randomness)
     
     use_transform=True
-    use_intensity=False
+    use_intensity=True
     
     if use_intensity :
         in_features_dim = 2

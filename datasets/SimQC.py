@@ -70,15 +70,36 @@ class SimQCDataset(PointCloudDataset):
         # Training or test set
         self.set = "val" if split=="validation" else split
         # Get a list of sequences
+        
+        
         self.data_path = data_path if split=="test" else join(self.path, self.set) 
+        
         # List all files in each sequence
-        self.path_files = ost.getFileBySubstr(self.data_path,'.ply')
+        frame_check_flag=False
+        tmp_path_files = ost.getFileBySubstr(self.data_path,'.ply')
+        if config.dataset_usage is None or config.dataset_usage==1 or self.set== "test" or self.set== "val" :
+            self.path_files = tmp_path_files
+        else :
+            print("INFO : dataset_usage detected, only using :", config.dataset_usage,"% of dataset")
+            ind_full=np.load(ost.getFileBySubstr(self.path,'index_selection')[0],allow_pickle=True)
+            ind_selected=ind_full[:int(ind_full.shape[0]*config.dataset_usage)]
+            self.path_files =[tmp_path_files[i] for i in ind_selected]
+            frame_check_flag=True
+            
 
-        self.sequences = []
+        seq_dict=dict()
         for file in self.path_files:
             a = ost.pathRelative(file,2)
             a = os.path.join(a.split("/")[0],a.split("/")[1])
-            self.sequences += [a]
+            try:
+                seq_dict[a].append(file)
+            except:
+                seq_dict[a]=[file]
+        
+        self.sequences=list(seq_dict.keys())
+        self.frames=list(seq_dict.values())
+
+        
         
         if config.use_intensity:
             print("Run with intensity")
@@ -92,13 +113,9 @@ class SimQCDataset(PointCloudDataset):
         else:
             print("Run WITHOUT transformations")
 
-        self.sequences = list(set(self.sequences))
+        
 
-        self.frames = []
-        for seq in self.sequences:
-            velo_path = join(self.data_path, "sequences", seq)
-            frames = np.sort([vf[:-4] for vf in listdir(velo_path) if vf.endswith('.ply')])
-            self.frames.append(frames)
+
         
 
         ###########################
@@ -308,8 +325,8 @@ class SimQCDataset(PointCloudDataset):
             num_merged = 0
 
             # Path of points and labels
-            seq_path = join(self.data_path,"sequences",self.sequences[s_ind])
-            velo_file = join(seq_path, self.frames[s_ind][f_ind] + ".ply")
+            seq_path = join(self.data_path,self.sequences[s_ind])
+            velo_file = join(seq_path, self.frames[s_ind][f_ind])
             # velo_file = "/home/reza/PHD/Data/SimQC_sample/train/sequences/td_5/ab_41/5_41_12.ply"
             # print("velo",velo_file)
 

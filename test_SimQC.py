@@ -58,17 +58,19 @@ from models.architectures import KPCNN, KPFCNN
 if __name__ == '__main__':
     #SELECT CHKPT
     # chkp = "/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_int_tr/checkpoints/chkp_best_mVal_IoU_epoch_6.tar"
-    chkp="/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_noint_notr/checkpoints/chkp_best_mVal_IoU_epoch_6.tar"
+    # chkp="/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_noint_notr/checkpoints/chkp_best_mVal_IoU_epoch_6.tar"
+    # chkp="/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_noint_tr/checkpoints/chkp_best_mVal_IoU_epoch_8.tar"
+    chkp="/home/reza/PHD/Sum24/SimQC/KPConv/logs/run_train_e9_int_notr/checkpoints/chkp_best_mVal_IoU_epoch_8.tar"
     
     #SELECT OUTPUT FOLDER
     output_path="/home/reza/PHD/Sum24/SimQC/KPConv/results"
     output_path=ost.createDirIncremental(output_path+"/inference")
     
     #INTENSTITY MAX VALUE AND DATA
-    data_path="/home/reza/PHD/Data/SimQC/test"
-    intensity_max=1025
-    # data_path="/home/reza/PHD/Data/ALSlike_full_seq/test"
-    # intensity_max=125
+    # data_path="/home/reza/PHD/Data/SimQC/test"
+    # intensity_max=1025
+    data_path="/home/reza/PHD/Data/ALSlike_full/test"
+    intensity_max=125
   
 
     ############################
@@ -78,6 +80,8 @@ if __name__ == '__main__':
     # Initialize configuration class
     config = Config()
     config.load(ost.pathBranch(chkp,2))  
+    
+    print(config.use_intensity)
     
     # Set which gpu is going to be used
     GPU_ID = '0'
